@@ -1,5 +1,7 @@
 const _ = require('lodash');
-const { ApolloServer, gql } = require('apollo-server');
+const express = require('express');
+const { ApolloServer, gql } = require('apollo-server-express');
+const pinoHttp = require('pino-http');
 const { MongoClient } = require('mongodb');
 const mingo = require('mingo');
 const config = require('./config');
@@ -142,9 +144,21 @@ const resolvers = {
   },
 };
 
+const app = express();
+
+app.use(pinoHttp({
+  logger: config.logger,
+}));
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  engine: {
+    sendHeaders: { all: true},
+  },
+  context: (ctx) => {
+    return { ip: ctx.req.ip }
+  },
   introspection: true,
   playground: true,
   plugins: [
@@ -152,6 +166,8 @@ const server = new ApolloServer({
   ],
 });
 
-server.listen(config.port, '0.0.0.0').then(({ url }) => {
-  config.logger.info(`🚀  Server ready at ${url}`);
+server.applyMiddleware({ app });
+
+app.listen(config.port, '0.0.0.0', () => {
+  config.logger.info(`🚀  Server ready at http://0.0.0.0:${config.port}/`);
 });
