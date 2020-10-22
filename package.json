@@ -9,14 +9,19 @@
     "lint": "eslint --ext .js --ignore-path .gitignore ."
   },
   "author": "Alistair Scott",
-  "license": "ISC",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "https://raw.githubusercontent.com/infracost/cloud-pricing-api/master/LICENSE"
+    }
+  ],
   "dependencies": {
     "apollo-server-express": "^2.17.0",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "glob": "^7.1.6",
-    "graphql": "^15.0.0",
     "lodash": "^4.17.19",
     "mingo": "^3.0.5",
     "mongodb": "^3.5.8",
@@ -29,8 +34,13 @@
   "devDependencies": {
     "@babel/core": "^7.10.5",
     "@babel/node": "^7.10.5",
-    "eslint": "^7.2.0",
+    "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.21.1"
+    "eslint-plugin-import": "^2.21.1",
+    "graphql": "^14.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infracost/cloud-pricing-api.git"
   }
 }
