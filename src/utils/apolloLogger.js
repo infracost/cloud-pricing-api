@@ -22,7 +22,7 @@ module.exports = {
     const ctx = _.omit(requestContext.context, '_extensionStack');
 
     const query = truncate(prettier.format(requestContext.request.query, { parser: 'graphql' }));
-    const vars = truncate(JSON.stringify(requestContext.request.variables, null, 2));
+    const vars = truncate(JSON.stringify(requestContext.request.variables || {}, null, 2));
     config.logger.debug(ctx, `GraphQL request started:\n${query}\nvariables:\n${vars}`);
 
     return {
