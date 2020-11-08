@@ -1,13 +1,18 @@
-FROM node:13-alpine
+FROM node:14.15.0-alpine3.12 as build
 
-RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
-
-COPY package*.json /usr/src/app/
+COPY package*.json ./
 RUN npm install --production
+RUN cp -R node_modules prod_node_modules
+RUN npm install
+COPY . .
+RUN npm run build
 
-COPY . /usr/src/app
+FROM node:14.15.0-alpine3.12 as release
 
+WORKDIR /usr/src/app
+COPY --from=build /usr/src/app/prod_node_modules ./node_modules
+COPY --from=build /usr/src/app/dist ./dist
+COPY package*.json ./
 EXPOSE 4000
-
-CMD ["npm", "start"]
+CMD [ "npm", "run", "start" ]

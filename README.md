@@ -122,10 +122,17 @@ Response:
 
 ## Usage
 
-### Running
+### Running locally
 
 ```
-npm start
+npm run dev
+```
+
+### Running in production
+
+```
+npm build
+npm run start
 ```
 
 You can now access the GraphQL Playground at [http://localhost:4000/graphql](http://localhost:4000/graphql).

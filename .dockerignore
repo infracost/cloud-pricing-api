@@ -3,4 +3,3 @@
 .env
 /tmp
 /dist
-.env.local
