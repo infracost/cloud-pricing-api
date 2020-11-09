@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import axios from 'axios';
 import config from '../config';
-import { Product, Price } from '../db/types';
+import { Product } from '../db/types';
 import { generatePriceHash } from '../db/helpers';
+import { upsertPrice } from '../db/upsert';
 
 const ec2Url = 'https://website.spot.ec2.aws.a2z.com/spot.js';
 
@@ -75,88 +76,88 @@ async function loadEc2(jsonData: SpotJson) {
           continue;
         }
 
-        const product = await findProduct(
+        const products = await findProducts(
           region,
           instanceType,
           operatingSystem
         );
-        if (!product) {
+        if (products.length === 0) {
           config.logger.warn(
-            `SKIPPING: could not find an existing product for ${region}, ${instanceType}, ${operatingSystem}`
+            `SKIPPING: could not find an existing products for ${region}, ${instanceType}, ${operatingSystem}`
           );
-          continue;
+          return;
         }
 
-        const existingSpotPrice = product.prices.find(
-          (p) => p.purchaseOption === 'spot'
-        );
-        if (existingSpotPrice) {
-          if (existingSpotPrice.USD === usd) {
-            continue;
-          }
-          existingSpotPrice.effectiveDateStart = now;
-          existingSpotPrice.USD = usd;
-          await updateProduct(product);
-          continue;
-        }
-
-        const existingOnDemandPrice = product.prices.find(
-          (p) => p.purchaseOption === 'on_demand'
-        );
-        if (existingOnDemandPrice) {
-          const newSpotPrice: Price = {
-            ...existingOnDemandPrice,
-            purchaseOption: 'spot',
-            USD: usd,
-            effectiveDateStart: now,
-          };
-
-          newSpotPrice.priceHash = generatePriceHash(
-            product.productHash,
-            newSpotPrice
-          );
-
-          product.prices.push(newSpotPrice);
-          await updateProduct(product);
-          continue;
+        for (const product of products) {
+          await updateProduct(product, usd, now);
         }
       }
     }
   }
 }
 
-async function findProduct(
+async function updateProduct(
+  product: Product,
+  usd: string,
+  effectiveDateStart: Date
+): Promise<void> {
+  let price = product.prices.find((p) => p.purchaseOption === 'spot');
+
+  // No changes
+  if (price && price.USD === usd) {
+    return;
+  }
+
+  if (!price) {
+    const onDemandPrice = product.prices.find(
+      (p) => p.purchaseOption === 'on_demand'
+    );
+    if (onDemandPrice) {
+      price = {
+        ...onDemandPrice,
+        purchaseOption: 'spot',
+      };
+    }
+  }
+
+  if (!price) {
+    config.logger.warn(
+      `SKIPPING: could not find an existing on-demand price for product hash ${product.productHash}`
+    );
+    return;
+  }
+
+  price.description = '';
+  price.effectiveDateStart = effectiveDateStart.toString();
+  price.USD = usd;
+
+  price.priceHash = generatePriceHash(product, price);
+
+  await upsertPrice(product, price);
+}
+
+async function findProducts(
   region: string,
   instanceType: string,
   operatingSystem: string
-): Promise<Product | null> {
+): Promise<Product[]> {
   const db = await config.db();
 
-  return db.collection('products').findOne({
-    vendorName: 'aws',
-    service: 'AmazonEC2',
-    productFamily: {
-      $in: ['Compute Instance', 'Compute Instance (bare metal)'],
-    },
-    region,
-    'attributes.instanceType': instanceType,
-    'attributes.operatingSystem': operatingSystem,
-    'attributes.tenancy': { $in: ['Shared', 'Host'] },
-    'attributes.capacitystatus': 'Used',
-    'attributes.preInstalledSw': 'NA',
-  });
-}
-
-async function updateProduct(product: Product) {
-  const db = await config.db();
-
-  return db.collection('products').updateOne(
-    {
+  return db
+    .collection('products')
+    .find<Product>({
       vendorName: 'aws',
-      sku: product.sku,
-    },
-    { $set: product }
-  );
+      service: 'AmazonEC2',
+      productFamily: {
+        $in: ['Compute Instance', 'Compute Instance (bare metal)'],
+      },
+      region,
+      'attributes.instanceType': instanceType,
+      'attributes.operatingSystem': operatingSystem,
+      'attributes.capacitystatus': 'Used',
+      'attributes.preInstalledSw': 'NA',
+    })
+    .toArray();
 }
 
 export default {

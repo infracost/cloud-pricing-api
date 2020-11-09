@@ -2,6 +2,7 @@ import yargs from 'yargs';
 import config from '../config';
 import awsBulk from './awsBulk';
 import awsSpot from './awsSpot';
+import gcpCatalog from './gcpCatalog';
 
 interface UpdaterConfig {
   vendor: string;
@@ -13,6 +14,9 @@ const updaters = {
   aws: {
     bulk: awsBulk.update,
     spot: awsSpot.update,
+  },
+  gcp: {
+    catalog: gcpCatalog.update,
   },
 };
 

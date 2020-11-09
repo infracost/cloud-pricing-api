@@ -1,16 +1,15 @@
 import fs from 'fs';
 import _ from 'lodash';
-import { BulkWriteUpdateOneOperation } from 'mongodb';
 import axios from 'axios';
 import glob from 'glob';
 import config from '../config';
 import { Product, Price } from '../db/types';
 import { generateProductHash, generatePriceHash } from '../db/helpers';
+import { upsertProducts } from '../db/upsert';
 
 const baseUrl = 'https://pricing.us-east-1.amazonaws.com';
 const indexUrl = '/offers/v1.0/aws/index.json';
 const splitByRegions = ['AmazonEC2'];
-const batchSize = 1000;
 
 const regionMapping: { [key: string]: string } = {
   'AWS GovCloud (US)': 'us-gov-west-1',
@@ -22,7 +21,7 @@ const regionMapping: { [key: string]: string } = {
   'US West (Oregon)': 'us-west-2',
   'US West (Los Angeles)': 'us-west-2-lax-1',
   'US ISO East': 'us-iso-east-1',
-  'US ISOB East (Ohio)': ' us-isob-east-1',
+  'US ISOB East (Ohio)': 'us-isob-east-1',
   'Canada (Central)': 'ca-central-1',
   'China (Beijing)': 'cn-north-1',
   'China (Ningxia)': 'cn-northwest-1',
@@ -155,13 +154,7 @@ async function processFile(filename: string): Promise<void> {
   const body = fs.readFileSync(filename);
   const json = <ServiceJson>JSON.parse(body.toString());
 
-  const promises = [];
-
-  let batchUpdates: BulkWriteUpdateOneOperation<Product>[] = [];
-
-  const db = await config.db();
-
-  Object.values(json.products).forEach((productJson) => {
+  const products = Object.values(json.products).map((productJson) => {
     const product = parseProduct(productJson);
 
     if (json.terms.OnDemand && json.terms.OnDemand[product.sku]) {
@@ -176,27 +169,10 @@ async function processFile(filename: string): Promise<void> {
       );
     }
 
-    batchUpdates.push({
-      updateOne: {
-        filter: {
-          vendorName: product.vendorName,
-          sku: product.sku,
-        },
-        update: {
-          $set: product,
-        },
-        upsert: true,
-      },
-    });
-
-    if (batchUpdates.length >= batchSize) {
-      promises.push(db.collection('products').bulkWrite(batchUpdates));
-      batchUpdates = [];
-    }
+    return product;
   });
 
-  promises.push(db.collection('products').bulkWrite(batchUpdates));
-  await Promise.all(promises);
+  await upsertProducts(products);
 }
 
 function parseProduct(productJson: ProductJson) {
@@ -230,9 +206,9 @@ function parsePrices(
         purchaseOption,
         unit: priceDimension.unit,
         USD: priceDimension.pricePerUnit.USD,
-        effectiveDateStart: new Date(priceItem.effectiveDate),
-        startUsageAmount: Number(priceDimension.beginRange),
-        endUsageAmount: Number(priceDimension.endRange),
+        effectiveDateStart: priceItem.effectiveDate,
+        startUsageAmount: priceDimension.beginRange,
+        endUsageAmount: priceDimension.endRange,
         description: priceDimension.description,
       };
 
@@ -248,7 +224,7 @@ function parsePrices(
         });
       }
 
-      price.priceHash = generatePriceHash(product.productHash, price);
+      price.priceHash = generatePriceHash(product, price);
 
       prices.push(price);
     });

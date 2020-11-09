@@ -6,11 +6,6 @@ import { Product, Price } from './db/types';
 
 const productLimit = 1000;
 
-const defaultOperation = '$eq';
-const operationMapping: { [key: string]: string } = {
-  regex: '$regex',
-};
-
 type MongoDbFilter = { [attr: string]: { [op: string]: string | RegExp } };
 
 type Filter = { [key: string]: string };
@@ -23,7 +18,7 @@ type AttributeFilter = {
 
 interface ProductsArgs {
   filter: Filter & {
-    attributes: AttributeFilter[];
+    attributeFilters: AttributeFilter[];
   };
 }
 
@@ -51,10 +46,10 @@ const resolvers: IResolvers = {
       const db = await config.db();
 
       const productFilter = transformFilter(
-        <Filter>_.omit(args.filter, 'attributes')
+        <Filter>_.omit(args.filter, 'attributeFilters')
       );
       const attributeFilters = transformAttributeFilters(
-        <AttributeFilter[]>args.filter.attributes
+        <AttributeFilter[]>args.filter.attributeFilters
       );
 
       const products = await db
@@ -78,6 +73,7 @@ const resolvers: IResolvers = {
         value: a[1],
       })),
     prices: async (product: Product, args: PricesArgs): Promise<Price[]> => {
+      console.log(transformFilter(args.filter));
       const prices = mingo.find(product.prices, transformFilter(args.filter));
       return prices.all();
     },
@@ -91,15 +87,20 @@ function transformFilter(filter: Filter): MongoDbFilter {
   }
   Object.entries(filter).forEach((filterItem) => {
     const keyPart = filterItem[0];
-    let value: string | RegExp = filterItem[1];
-    const [key, operation] = keyPart.split('_');
-    if (operation === 'regex') {
+    let value: any = filterItem[1]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    let op = '$eq';
+
+    const [key, opPart] = keyPart.split('_');
+    if (opPart === 'regex') {
+      op = '$regex';
       value = strToRegex(value);
+    } else if (value === '') {
+      op = '$in';
+      value = ['', null];
     }
-    const transformedOperation =
-      operationMapping[operation] || defaultOperation;
+
     transformed[key] = {};
-    transformed[key][transformedOperation] = value;
+    transformed[key][op] = value;
   });
   return transformed;
 }

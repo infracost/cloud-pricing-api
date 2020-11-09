@@ -16,10 +16,10 @@ export type Price = {
   purchaseOption: string;
   unit: string;
   USD: string;
-  effectiveDateStart: Date;
-  effectiveDateEnd?: Date;
-  startUsageAmount?: number;
-  endUsageAmount?: number;
+  effectiveDateStart: string;
+  effectiveDateEnd?: string;
+  startUsageAmount?: string;
+  endUsageAmount?: string;
   termLength?: string;
   termPurchaseOption?: string;
   termOfferingClass?: string;

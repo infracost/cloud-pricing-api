@@ -7,6 +7,38 @@ dotenv.config();
 
 let client: MongoClient;
 
+async function setupDb(db: Db): Promise<void> {
+  db.collection('products').createIndex({ vendorName: 1, sku: 1 });
+  db.collection('products').createIndex({ productHash: 1 }, { unique: true });
+  db.collection('products').createIndex({
+    vendorName: 1,
+    service: 1,
+    productFamily: 1,
+    region: 1,
+  });
+  db.collection('products').createIndex({
+    vendorName: 1,
+    service: 1,
+    productFamily: 1,
+    region: 1,
+    'attributes.instanceType': 1,
+    'attributes.tenancy': 1,
+    'attributes.operatingSystem': 1,
+    'attributes.capacitystatus': 1,
+    'attributes.preInstalledSw': 1,
+  });
+  db.collection('products').createIndex({
+    vendorName: 1,
+    service: 1,
+    productFamily: 1,
+    region: 1,
+    'attributes.instanceType': 1,
+    'attributes.deploymentOption': 1,
+    'attributes.databaseEngine': 1,
+    'attributes.databaseEdition': 1,
+  });
+}
+
 async function db(): Promise<Db> {
   if (!client) {
     client = await MongoClient.connect(config.mongoDbUri, {
@@ -14,6 +46,7 @@ async function db(): Promise<Db> {
       useNewUrlParser: true,
       poolSize: 10,
     });
+    await setupDb(client.db());
   }
   return client.db();
 }

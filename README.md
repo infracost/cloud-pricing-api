@@ -1,6 +1,6 @@
 # Cloud Pricing API
 
-This project aims to create a GraphQL cloud pricing API. Currently only AWS resources are supported, but future support for other cloud vendors is planned.
+This project aims to create a GraphQL cloud pricing API. Currently supports AWS & Google, future support for other cloud vendors is planned.
 
 Infracost has a hosted version of this service. To get an API key [download infracost](https://www.infracost.io/docs/#installation) and run `infracost register`.
 
@@ -114,10 +114,15 @@ Response:
   ```
 
 4. Update the pricing data
-   **Note: this downloads about 1.8 GB of data**
+   **Note: this downloads several GB of data**
 
   ```sh
   npm run update
+  ```
+
+  If you only want to download from a single source you can run:
+  ```sh
+  npm run update -- --only=aws:bulk
   ```
 
 ## Usage

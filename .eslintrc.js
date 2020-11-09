@@ -25,6 +25,7 @@ module.exports = {
     'no-continue': 'off',
     'no-plusplus': 'off',
     'no-restricted-syntax': 'off',
+    'no-shadow': 'off',
     'no-use-before-define': 'off',
     'no-useless-constructor': 'off',
   },
