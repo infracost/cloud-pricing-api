@@ -18,6 +18,10 @@ module.exports = {
     },
   },
   rules: {
+    "camelcase": ['error', {
+      ignoreImports: true,
+      allow: ['compute_v1'],
+    }],
     'import/extensions': 'off',
     'max-classes-per-file': 'off',
     'max-len': 'off',

@@ -105,6 +105,11 @@ Response:
 
   ```
   MONGODB_URI=mongodb://localhost:27017/cloudPricing
+
+  # If using GCP
+  GCP_PROJECT=
+  GCP_API_KEY=<GCP API Key> # An API key with access to the GCP Cloud Billing API
+  GCP_KEY_FILE=gcp_creds.json # Credentials for a service account that has read-only access to Compute Engine.
   ```
 
 3. Install the npm packages

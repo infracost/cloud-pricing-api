@@ -3,6 +3,7 @@ import config from '../config';
 import awsBulk from './awsBulk';
 import awsSpot from './awsSpot';
 import gcpCatalog from './gcpCatalog';
+import gcpMachineTypes from './gcpMachineTypes';
 
 interface UpdaterConfig {
   vendor: string;
@@ -17,12 +18,13 @@ const updaters = {
   },
   gcp: {
     catalog: gcpCatalog.update,
+    machineTypes: gcpMachineTypes.update,
   },
 };
 
 async function run(): Promise<void> {
   const { argv } = yargs
-    .usage('Usage: $0 --only=[aws:bulk,aws:spot,gcp:catalog]')
+    .usage('Usage: $0 --only=[aws:bulk,aws:spot,gcp:catalog,gcp:machineTypes]')
     .options({
       only: { type: 'string' },
     });

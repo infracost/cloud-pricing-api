@@ -61,6 +61,8 @@ const config = {
   db,
   port: Number(process.env.PORT) || 4000,
   gcpApiKey: process.env.GCP_API_KEY,
+  gcpKeyFile: process.env.GCP_KEY_FILE,
+  gcpProject: process.env.GCP_PROJECT,
   mongoDbUri:
     process.env.MONGODB_URI || 'mongodb://localhost:27017/cloudPricing',
 };

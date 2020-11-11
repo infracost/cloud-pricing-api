@@ -1,5 +1,5 @@
 import fs from 'fs';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import glob from 'glob';
 import config from '../config';
 import { Product, Price } from '../db/types';
@@ -95,11 +95,36 @@ async function downloadService(service: ServiceJson): Promise<void> {
     if (nextPageToken) {
       nextPageParam = `&pageToken=${nextPageToken}`;
     }
-    const resp = await axios({
-      method: 'get',
-      url: `${baseUrl}/services/${service.serviceId}/skus?key=${config.gcpApiKey}${nextPageParam}`,
-      responseType: 'stream',
-    });
+
+    let resp: AxiosResponse | null = null;
+    let success = false;
+    let attempts = 0;
+
+    do {
+      try {
+        attempts++;
+        resp = await axios({
+          method: 'get',
+          url: `${baseUrl}/services/${service.serviceId}/skus?key=${config.gcpApiKey}${nextPageParam}`,
+          responseType: 'stream',
+        });
+        success = true;
+      } catch (err) {
+        // Too many requests, sleep and retry
+        if (err.response.status === 429) {
+          config.logger.info(
+            'Too many requests, sleeping for 30s and retrying'
+          );
+          await sleep(30000);
+        } else {
+          throw err;
+        }
+      }
+    } while (!success && attempts < 3);
+
+    if (!resp) {
+      return;
+    }
 
     let filename = `gcp-${service.displayName}-${pageNum}`;
     filename = filename.replace(/\//g, '-');
@@ -117,6 +142,10 @@ async function downloadService(service: ServiceJson): Promise<void> {
     nextPageToken = json.nextPageToken;
     pageNum++;
   } while (nextPageToken);
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function loadAll(): Promise<void> {

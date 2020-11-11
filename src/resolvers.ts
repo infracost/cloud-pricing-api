@@ -73,7 +73,6 @@ const resolvers: IResolvers = {
         value: a[1],
       })),
     prices: async (product: Product, args: PricesArgs): Promise<Price[]> => {
-      console.log(transformFilter(args.filter));
       const prices = mingo.find(product.prices, transformFilter(args.filter));
       return prices.all();
     },
