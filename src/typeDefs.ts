@@ -20,7 +20,7 @@ const typeDefs = gql`
     productHash: String!
     vendorName: String!
     service: String!
-    productFamily: String!
+    productFamily: String
     region: String
     sku: String!
     attributes: [Attribute]
