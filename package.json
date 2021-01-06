@@ -23,7 +23,7 @@
   "dependencies": {
     "apollo-server-express": "^2.17.0",
     "apollo-server-plugin-base": "^0.10.2",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "decimal.js": "^10.2.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
