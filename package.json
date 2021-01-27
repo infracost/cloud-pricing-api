@@ -23,6 +23,7 @@
   "dependencies": {
     "apollo-server-express": "^2.17.0",
     "apollo-server-plugin-base": "^0.10.2",
+    "async-mutex": "^0.2.6",
     "axios": "^0.21.1",
     "decimal.js": "^10.2.1",
     "dotenv": "^8.2.0",
@@ -35,6 +36,7 @@
     "lodash": "^4.17.19",
     "mingo": "^3.0.5",
     "mongodb": "^3.5.8",
+    "node-cache": "^5.1.2",
     "pino": "^6.3.2",
     "pino-http": "^5.2.0",
     "pino-pretty": "^4.0.0",

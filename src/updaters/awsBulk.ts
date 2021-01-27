@@ -9,6 +9,7 @@ import { upsertProducts } from '../db/upsert';
 
 const baseUrl = 'https://pricing.us-east-1.amazonaws.com';
 const indexUrl = '/offers/v1.0/aws/index.json';
+const chinaIndexUrl = '/offers/v1.0/cn/index.json';
 const splitByRegions = ['AmazonEC2'];
 
 const regionMapping: { [key: string]: string } = {
@@ -61,7 +62,8 @@ type PriceJson = {
       endRange: string;
       description: string;
       pricePerUnit: {
-        USD: string;
+        USD?: string;
+        CNY?: string;
       };
     };
   };
@@ -86,9 +88,16 @@ async function update(): Promise<void> {
 }
 
 async function downloadAll() {
-  const indexResp = await axios.get(`${baseUrl}${indexUrl}`);
+  // Download standard AWS regions
+  let indexResp = await axios.get(`${baseUrl}${indexUrl}`);
   for (const offer of <Offer[]>Object.values(indexResp.data.offers)) {
     await downloadService(offer);
+  }
+
+  // Download AWS China regions
+  indexResp = await axios.get(`${baseUrl}${chinaIndexUrl}`);
+  for (const offer of <Offer[]>Object.values(indexResp.data.offers)) {
+    await downloadService(offer, 'awscn');
   }
 }
 
@@ -103,7 +112,11 @@ interface Region {
   currentVersionUrl: string;
 }
 
-async function downloadService(offer: Offer) {
+async function downloadService(offer: Offer, prefix?: string) {
+  if (!prefix) {
+    prefix = 'aws'; // eslint-disable-line no-param-reassign
+  }
+
   if (_.includes(splitByRegions, offer.offerCode)) {
     const regionResp = await axios.get(
       `${baseUrl}${offer.currentRegionIndexUrl}`
@@ -116,7 +129,7 @@ async function downloadService(offer: Offer) {
         responseType: 'stream',
       });
       const writer = fs.createWriteStream(
-        `data/aws-${offer.offerCode}-${region.regionCode}.json`
+        `data/${prefix}-${offer.offerCode}-${region.regionCode}.json`
       );
       resp.data.pipe(writer);
       await new Promise((resolve) => {
@@ -130,7 +143,9 @@ async function downloadService(offer: Offer) {
       url: `${baseUrl}${offer.currentVersionUrl}`,
       responseType: 'stream',
     });
-    const writer = fs.createWriteStream(`data/aws-${offer.offerCode}.json`);
+    const writer = fs.createWriteStream(
+      `data/${prefix}-${offer.offerCode}.json`
+    );
     resp.data.pipe(writer);
     await new Promise((resolve) => {
       writer.on('finish', resolve);
@@ -139,7 +154,7 @@ async function downloadService(offer: Offer) {
 }
 
 async function loadAll(): Promise<void> {
-  for (const filename of glob.sync('data/aws-*.json')) {
+  for (const filename of glob.sync('data/aws*.json')) {
     config.logger.info(`Processing file: ${filename}`);
     try {
       await processFile(filename);
@@ -206,6 +221,7 @@ function parsePrices(
         purchaseOption,
         unit: priceDimension.unit,
         USD: priceDimension.pricePerUnit.USD,
+        CNY: priceDimension.pricePerUnit.CNY,
         effectiveDateStart: priceItem.effectiveDate,
         startUsageAmount: priceDimension.beginRange,
         endUsageAmount: priceDimension.endRange,

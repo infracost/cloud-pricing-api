@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import pino from 'pino';
 import { MongoClient, Db } from 'mongodb';
+import NodeCache from 'node-cache';
 
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -56,9 +57,12 @@ const logger = pino({
   prettyPrint: process.env.NODE_ENV !== 'production',
 });
 
+const cache = new NodeCache();
+
 const config = {
   logger,
   db,
+  cache,
   port: Number(process.env.PORT) || 4000,
   gcpApiKey: process.env.GCP_API_KEY,
   gcpKeyFile: process.env.GCP_KEY_FILE,

@@ -3,6 +3,7 @@ import { IResolvers } from 'graphql-tools';
 import mingo from 'mingo';
 import config from './config';
 import { Product, Price } from './db/types';
+import currency from './utils/currency';
 
 const productLimit = 1000;
 
@@ -73,8 +74,11 @@ const resolvers: IResolvers = {
         value: a[1],
       })),
     prices: async (product: Product, args: PricesArgs): Promise<Price[]> => {
-      const prices = mingo.find(product.prices, transformFilter(args.filter));
-      return prices.all();
+      const prices = mingo
+        .find(product.prices, transformFilter(args.filter))
+        .all();
+      await convertCurrencies(prices);
+      return prices;
     },
   },
 };
@@ -115,6 +119,15 @@ function transformAttributeFilters(filters: AttributeFilter[]): MongoDbFilter {
     ).value;
   });
   return transformed;
+}
+
+async function convertCurrencies(prices: Price[]) {
+  for (const price of prices) {
+    if (price.USD === null && price.CNY !== null) {
+      const usd = await currency.convert('CNY', 'USD', Number(price.CNY));
+      price.USD = usd.toString();
+    }
+  }
 }
 
 export default resolvers;

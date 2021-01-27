@@ -15,7 +15,8 @@ export type Price = {
   priceHash: string;
   purchaseOption: string;
   unit: string;
-  USD: string;
+  USD?: string;
+  CNY?: string;
   effectiveDateStart: string;
   effectiveDateEnd?: string;
   startUsageAmount?: string;
