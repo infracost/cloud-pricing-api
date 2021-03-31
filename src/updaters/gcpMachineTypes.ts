@@ -41,6 +41,10 @@ const machineTypeDescriptionLookups: {
     cpu: 'N2D AMD Instance Core',
     memory: 'N2D AMD Instance Ram',
   },
+  a2: {
+    cpu: 'A2 Instance Core',
+    memory: 'A2 Instance Ram',
+  },
 };
 
 const machineTypeOverrides: {
@@ -136,6 +140,13 @@ async function createPrice(
   const prefix = machineTypeName.split('-')[0];
 
   let result: { amount: Decimal; effectiveDateStart: string } | null = null;
+
+  if (!machineTypeDescriptionLookups[prefix]) {
+    config.logger.warn(
+      `Could not find description lookup for machine type ${machineTypeName}`
+    );
+    return null;
+  }
 
   if (machineTypeDescriptionLookups[prefix].total) {
     result = await calculateAmountFromTotal(
