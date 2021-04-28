@@ -112,8 +112,8 @@ async function processFile(filename: string): Promise<void> {
 function parseProduct(productJson: ProductJson): Product {
   let sku = `${productJson.skuId}/${productJson.meterId}`;
 
-  // Use the ARM SKU Name for VMs so we can group the purchase options
-  if (productJson.serviceName === 'Virtual Machines') {
+  // Use the ARM SKU Name for VMs and App Service Plans so we can group the purchase options
+  if (productJson.serviceName === 'Virtual Machines' || productJson.serviceName == 'Azure App Service') {
     sku = `${productJson.productId}/${productJson.armSkuName}/${productJson.meterId}`;
   }
 
