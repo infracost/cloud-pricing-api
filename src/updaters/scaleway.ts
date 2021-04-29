@@ -60,7 +60,7 @@ async function processServersFile(region: string, path: string) {
       region: region,
       sku: `generated-${serverName}`,
       attributes: {
-        commercialType: serverName,
+        instanceType: serverName,
       },
       prices: [],
     };
