@@ -17,6 +17,7 @@ export type Price = {
   unit: string;
   USD?: string;
   CNY?: string;
+  EUR?: string;
   effectiveDateStart: string;
   effectiveDateEnd?: string;
   startUsageAmount?: string;

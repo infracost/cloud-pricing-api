@@ -123,8 +123,11 @@ function transformAttributeFilters(filters: AttributeFilter[]): MongoDbFilter {
 
 async function convertCurrencies(prices: Price[]) {
   for (const price of prices) {
-    if (price.USD === null && price.CNY !== null) {
+    if (price.USD === undefined && price.CNY !== undefined) {
       const usd = await currency.convert('CNY', 'USD', Number(price.CNY));
+      price.USD = usd.toString();
+    } else if (price.USD === undefined && price.EUR !== undefined) {
+      const usd = await currency.convert('EUR', 'USD', Number(price.EUR));
       price.USD = usd.toString();
     }
   }

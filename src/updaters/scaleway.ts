@@ -70,7 +70,7 @@ async function processServersFile(region: string, path: string) {
     const hourlyPrice: Price = {
       priceHash: '',
       unit: 'hourly',
-      USD: server.hourly_price.toString(),
+      EUR: server.hourly_price.toString(),
       purchaseOption: '',
       effectiveDateStart: '',
     };
@@ -80,7 +80,7 @@ async function processServersFile(region: string, path: string) {
     const monthlyPrice: Price = {
       priceHash: '',
       unit: 'monthly',
-      USD: server.monthly_price.toString(),
+      EUR: server.monthly_price.toString(),
       purchaseOption: '',
       effectiveDateStart: '',
     };
