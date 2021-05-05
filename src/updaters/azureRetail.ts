@@ -25,9 +25,9 @@ type PageJson = {
 
 type ProductJson = {
   currencyCode: string;
-  tierMinimumUnits: string;
-  retailPrice: string;
-  unitPrice: string;
+  tierMinimumUnits: Number;
+  retailPrice: Number;
+  unitPrice: Number;
   armRegionName: string;
   location: string;
   effectiveStartDate: string;
@@ -162,7 +162,7 @@ function parsePrices(product: Product, productJson: ProductJson): Price[] {
     unit: productJson.unitOfMeasure,
     USD: `${productJson.unitPrice}`,
     effectiveDateStart: productJson.effectiveStartDate,
-    startUsageAmount: productJson.tierMinimumUnits,
+    startUsageAmount: `${productJson.tierMinimumUnits}`,
   };
 
   if (productJson.reservationTerm) {
