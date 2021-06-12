@@ -3,6 +3,7 @@ import config from '../config';
 import awsBulk from './awsBulk';
 import awsSpot from './awsSpot';
 import azureRetail from './azureRetail';
+import digitaloceanDroplets from './digitaloceanDroplets';
 import gcpCatalog from './gcpCatalog';
 import gcpMachineTypes from './gcpMachineTypes';
 
@@ -20,6 +21,9 @@ const updaters = {
   azure: {
     retail: azureRetail.update,
   },
+  digitalocean: {
+    droplets: digitaloceanDroplets.update,
+  },
   gcp: {
     catalog: gcpCatalog.update,
     machineTypes: gcpMachineTypes.update,
@@ -29,7 +33,7 @@ const updaters = {
 async function run(): Promise<void> {
   const { argv } = yargs
     .usage(
-      'Usage: $0 --only=[aws:bulk,aws:spot,azure:retail,gcp:catalog,gcp:machineTypes]'
+      'Usage: $0 --only=[aws:bulk,aws:spot,azure:retail,gcp:catalog,gcp:machineTypes,digitalocean:droplets]'
     )
     .options({
       only: { type: 'string' },

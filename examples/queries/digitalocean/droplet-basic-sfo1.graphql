@@ -1,0 +1,20 @@
+query {
+    products(
+        filter: {
+            vendorName: "digitalocean"
+            service: "Droplets"
+            productFamily: "Basic"
+            region: "sfo1"
+            attributeFilters: [{ key: "memory", value: "1024" }]
+        }
+    ) {
+        sku
+        attributes {
+            key
+            value
+        }
+        prices {
+            USD
+        }
+    }
+}
