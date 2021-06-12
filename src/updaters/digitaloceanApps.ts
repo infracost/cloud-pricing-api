@@ -1,12 +1,12 @@
-import axios from "axios";
-import fs from "fs";
+import axios from 'axios';
+import fs from 'fs';
 
 import config from '../config';
 import { generateProductHash, generatePriceHash } from '../db/helpers';
 import { Product, Price } from '../db/types';
 import { upsertProducts } from '../db/upsert';
 
-const baseUrl = "https://api.digitalocean.com/v2";
+const baseUrl = 'https://api.digitalocean.com/v2';
 
 type InstancesResponse = {
   // eslint-disable-next-line camelcase
@@ -40,22 +40,22 @@ type Region = {
 
 async function downloadJson(path: string) {
   const url = `${baseUrl}${path}`
-  const segments = path.split("/");
+  const segments = path.split('/');
   const data = segments[segments.length - 1];
 
   config.logger.info(`Downloading ${url}`);
 
   const response = await axios({
-    method: "get",
+    method: 'get',
     url,
-    responseType: "stream",
+    responseType: 'stream',
     headers: {
       Authorization: `Bearer ${config.digitalOceanToken}`,
     },
   });
   const writer = fs.createWriteStream(`data/digitalocean-${data}.json`);
   response.data.pipe(writer);
-  await new Promise(resolve => writer.on("finish", resolve));
+  await new Promise(resolve => writer.on('finish', resolve));
 }
 
 function generateProduct(instance: Instance): Product {
@@ -75,8 +75,8 @@ function generateProduct(instance: Instance): Product {
   };
 }
 
-function generatePrice(unit: "hourly" | "monthly", instance: Instance, product: Product): Price {
-  const cost = unit === "hourly" ? parseFloat(instance.usd_per_second) * 60 * 60 : parseFloat(instance.usd_per_month);
+function generatePrice(unit: 'hourly' | 'monthly', instance: Instance, product: Product): Price {
+  const cost = unit === 'hourly' ? parseFloat(instance.usd_per_second) * 60 * 60 : parseFloat(instance.usd_per_month);
   const price = {
     priceHash: '',
     unit,
@@ -89,12 +89,12 @@ function generatePrice(unit: "hourly" | "monthly", instance: Instance, product: 
 }
 
 async function processApps() {
-  const regionsContent = fs.readFileSync("data/digitalocean-regions.json");
+  const regionsContent = fs.readFileSync('data/digitalocean-regions.json');
   const { regions: regionGroups } = <RegionsResponse>JSON.parse(regionsContent.toString());
   const regions = regionGroups.flatMap(group => group.data_centers);
   config.logger.info(`Got ${regions.length} regions in ${regionGroups.length} groups`);
 
-  const instancesContent = fs.readFileSync("data/digitalocean-instance_sizes.json");
+  const instancesContent = fs.readFileSync('data/digitalocean-instance_sizes.json');
   const { instance_sizes: instances } = <InstancesResponse>JSON.parse(instancesContent.toString());
   config.logger.info(`Got ${instances.length} instance types`);
 
@@ -106,8 +106,8 @@ async function processApps() {
       product.region = region;
       product.productHash = generateProductHash(product);
       product.prices = [
-        generatePrice("hourly", instance, product),
-        generatePrice("monthly", instance, product),
+        generatePrice('hourly', instance, product),
+        generatePrice('monthly', instance, product),
       ];
 
       return product;
@@ -119,8 +119,8 @@ async function processApps() {
 }
 
 async function update(): Promise<void> {
-  await downloadJson("/apps/regions");
-  await downloadJson("/apps/tiers/instance_sizes");
+  await downloadJson('/apps/regions');
+  await downloadJson('/apps/tiers/instance_sizes');
   await processApps();
 }
 

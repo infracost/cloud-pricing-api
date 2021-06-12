@@ -1,12 +1,12 @@
-import axios from "axios";
-import fs from "fs";
+import axios from 'axios';
+import fs from 'fs';
 
 import config from '../config';
 import { generateProductHash, generatePriceHash } from '../db/helpers';
 import { Product, Price } from '../db/types';
 import { upsertProducts } from '../db/upsert';
 
-const url = "https://api.digitalocean.com/v2/sizes";
+const url = 'https://api.digitalocean.com/v2/sizes';
 
 type Response = {
   sizes: Array<Droplet>,
@@ -30,9 +30,9 @@ type Droplet = {
 async function downloadJson() {
   config.logger.info(`Downloading ${url}`);
   const response = await axios({
-    method: "get",
+    method: 'get',
     url,
-    responseType: "stream",
+    responseType: 'stream',
     headers: {
       Authorization: `Bearer ${config.digitalOceanToken}`,
     },
@@ -41,9 +41,9 @@ async function downloadJson() {
       per_page: 250
     }
   });
-  const writer = fs.createWriteStream("data/digitalocean-droplets.json");
+  const writer = fs.createWriteStream('data/digitalocean-droplets.json');
   response.data.pipe(writer);
-  await new Promise(resolve => writer.on("finish", resolve));
+  await new Promise(resolve => writer.on('finish', resolve));
 }
 
 function generateProduct(droplet: Droplet): Product {
@@ -64,8 +64,8 @@ function generateProduct(droplet: Droplet): Product {
   };
 }
 
-function generatePrice(unit: "hourly" | "monthly", droplet: Droplet, product: Product): Price {
-  const cost = unit === "hourly" ? droplet.price_hourly : droplet.price_monthly;
+function generatePrice(unit: 'hourly' | 'monthly', droplet: Droplet, product: Product): Price {
+  const cost = unit === 'hourly' ? droplet.price_hourly : droplet.price_monthly;
   const price = {
     priceHash: '',
     unit,
@@ -78,7 +78,7 @@ function generatePrice(unit: "hourly" | "monthly", droplet: Droplet, product: Pr
 }
 
 async function processDroplets() {
-  const body = fs.readFileSync("data/digitalocean-droplets.json");
+  const body = fs.readFileSync('data/digitalocean-droplets.json');
   const json = <Response>JSON.parse(body.toString());
 
   const products = json.sizes.flatMap(droplet => {
@@ -88,8 +88,8 @@ async function processDroplets() {
       product.region = region;
       product.productHash = generateProductHash(product);
       product.prices = [
-        generatePrice("hourly", droplet, product),
-        generatePrice("monthly", droplet, product),
+        generatePrice('hourly', droplet, product),
+        generatePrice('monthly', droplet, product),
       ];
 
       return product;
