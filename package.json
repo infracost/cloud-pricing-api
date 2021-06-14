@@ -33,7 +33,7 @@
     "graphql": "^15.4.0",
     "graphql-tools": "^6.2.4",
     "graphql-upload": "^11.0.0",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "mingo": "^3.0.5",
     "mongodb": "^3.5.8",
     "node-cache": "^5.1.2",
