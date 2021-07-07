@@ -67,6 +67,7 @@ const config = {
   gcpApiKey: process.env.GCP_API_KEY,
   gcpKeyFile: process.env.GCP_KEY_FILE,
   gcpProject: process.env.GCP_PROJECT,
+  digitalOceanToken: process.env.DIGITALOCEAN_TOKEN,
   mongoDbUri:
     process.env.MONGODB_URI || 'mongodb://localhost:27017/cloudPricing',
 };

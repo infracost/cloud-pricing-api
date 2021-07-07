@@ -1,0 +1,24 @@
+# Write your query or mutation here
+query {
+    products(
+        filter: {
+            vendorName: "digitalocean"
+            service: "Apps"
+            productFamily: "professional"
+            region: "ams3"
+            attributeFilters: [
+                { key: "cpuType", value: "SHARED" }
+                { key: "cpus", value: "1" }
+            ]
+        }
+    ) {
+        sku
+        attributes {
+            key
+            value
+        }
+        prices {
+            USD
+        }
+    }
+}
