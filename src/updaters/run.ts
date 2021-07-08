@@ -5,6 +5,7 @@ import awsSpot from './awsSpot';
 import azureRetail from './azureRetail';
 import gcpCatalog from './gcpCatalog';
 import gcpMachineTypes from './gcpMachineTypes';
+import scaleway from './scaleway';
 
 interface UpdaterConfig {
   vendor: string;
@@ -13,6 +14,9 @@ interface UpdaterConfig {
 }
 
 const updaters = {
+  scaleway: {
+    all: scaleway.update,
+  },
   aws: {
     bulk: awsBulk.update,
     spot: awsSpot.update,
@@ -29,7 +33,7 @@ const updaters = {
 async function run(): Promise<void> {
   const { argv } = yargs
     .usage(
-      'Usage: $0 --only=[aws:bulk,aws:spot,azure:retail,gcp:catalog,gcp:machineTypes]'
+      'Usage: $0 --only=[aws:bulk,aws:spot,azure:retail,gcp:catalog,gcp:machineTypes,scaleway:all]'
     )
     .options({
       only: { type: 'string' },

@@ -14,6 +14,7 @@ const mutex = new Mutex();
 
 const currencyFallbacks: { [from: string]: { [to: string]: number } } = {
   CNY: { USD: 0.154 },
+  EUR: { USD: 1.21 },
 };
 
 async function convert(

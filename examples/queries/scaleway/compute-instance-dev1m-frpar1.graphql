@@ -1,0 +1,15 @@
+query {
+  products(
+    filter: {
+      vendorName: "scaleway"
+      service: "Compute"
+      productFamily: "Instance"
+      region: "fr-par-1"
+      attributeFilters: [{ key: "instanceType", value: "DEV1-M" }]
+    }
+  ) {
+    prices(filter: { unit: "hourly" }) {
+      USD
+    }
+  }
+}
