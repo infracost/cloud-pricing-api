@@ -60,3 +60,85 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create a default fully qualified app name for the postgreSQL instance
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains chart name it will be used as a full name.
+*/}}
+{{- define "cloud-pricing-api.postgresql.fullname" -}}
+{{- if .Values.postgresql.fullnameOverride -}}
+{{- .Values.postgresql.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "postgresql" .Values.postgresql.nameOverride -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get PostgreSQL host
+*/}}
+{{- define "cloud-pricing-api.postgresql.host" -}}
+{{- if .Values.postgresql.enabled -}}
+  {{- printf "%s" (include "cloud-pricing-api.postgresql.fullname" .) -}}
+{{- else -}}
+  {{ .Values.postgresql.external.host }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get PostgreSQL port
+*/}}
+{{- define "cloud-pricing-api.postgresql.port" -}}
+{{- if .Values.postgresql.enabled -}}
+  {{- printf "5432" | quote -}}
+{{- else -}}
+  {{ .Values.postgresql.external.port }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get PostgreSQL database
+*/}}
+{{- define "cloud-pricing-api.postgresql.database" -}}
+{{- if .Values.postgresql.enabled -}}
+  {{- .Values.postgresql.postgresqlDatabase -}}
+{{- else -}}
+  {{ .Values.postgresql.external.database }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get PostgreSQL user
+*/}}
+{{- define "cloud-pricing-api.postgresql.user" -}}
+{{- if .Values.postgresql.enabled -}}
+  {{- .Values.postgresql.postgresqlUsername -}}
+{{- else -}}
+  {{ .Values.postgresql.external.user }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the PostgreSQL secret name
+*/}}
+{{- define "cloud-pricing-api.postgresql.secretName" -}}
+{{- if .Values.postgresql.enabled }}
+    {{- if .Values.postgresql.existingSecret }}
+        {{- printf "%s" .Values.postgresql.existingSecret -}}
+    {{- else -}}
+        {{- printf "%s" (include "cloud-pricing-api.postgresql.fullname" .) -}}
+    {{- end -}}
+{{- else -}}
+    {{- printf "%s-external" (include "cloud-pricing-api.postgresql.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret for a external database should be created
+*/}}
+{{- define "cloud-pricing-api.postgresql.createExternalSecret" -}}
+{{- if and (not .Values.postgresql.enabled) (not .Values.postgresql.existingSecret) -}}
+  {{- true -}}
+{{- end -}}
+{{- end -}}

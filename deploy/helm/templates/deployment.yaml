@@ -50,6 +50,19 @@ spec:
           env:
             - name: MONGODB_URI
               value: {{ .Values.env.mongoDBURI }}
+            - name: DB_HOST
+              value: {{ include "cloud-pricing-api.postgresql.host" . }}
+            - name: DB_PORT
+              value: {{ include "cloud-pricing-api.postgresql.port" . }}
+            - name: DB_NAME
+              value: {{ .Values.postgresql.postgresqlDatabase | quote }}
+            - name: DB_USERNAME
+              value: {{ .Values.postgresql.postgresqlUsername | quote }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cloud-pricing-api.postgresql.secretName" . }}
+                  key: postgresql-password
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

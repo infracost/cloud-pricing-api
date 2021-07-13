@@ -71,6 +71,20 @@ ingress:
   #    hosts:
   #      - cloud-pricing-api.local
 
+postgresql:
+  enabled: true
+  usePasswordFile: false
+  # external:
+  #   host:
+  #   port:
+  #   database:
+  #   user:
+  #   password:
+  # Use an existing secret with the PostgreSQL password
+  # existingSecret:
+  postgresqlDatabase: cloud-pricing-api
+  postgresqlUsername: cloud-pricing-api
+
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
