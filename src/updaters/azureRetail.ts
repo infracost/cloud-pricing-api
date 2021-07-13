@@ -113,7 +113,10 @@ function parseProduct(productJson: ProductJson): Product {
   let sku = `${productJson.skuId}/${productJson.meterId}`;
 
   // Use the ARM SKU Name for VMs and App Service Plans so we can group the purchase options
-  if (productJson.serviceName === 'Virtual Machines' || productJson.serviceName == 'Azure App Service') {
+  if (
+    productJson.serviceName === 'Virtual Machines' ||
+    productJson.serviceName === 'Azure App Service'
+  ) {
     sku = `${productJson.productId}/${productJson.armSkuName}/${productJson.meterId}`;
   }
 
