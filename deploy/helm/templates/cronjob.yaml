@@ -39,7 +39,7 @@ spec:
                 {{- toYaml .Values.resources | nindent 16 }}
               env:
                 - name: MONGODB_URI
-                  value: {{ .Values.env.mongoDBURI }}
+                  value: {{ .Values.mongoDBURI }}
           {{- with .Values.nodeSelector }}
           nodeSelector:
             {{- toYaml . | nindent 12 }}

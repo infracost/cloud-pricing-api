@@ -15,9 +15,11 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-env:
-  # selfHostedInfracostAPIKey: CUSTOM_INFRACOST_API_KEY
-  mongoDBURI: mongodb://mongo:27017/pricing
+# By default a single static API key will be created for the Cloud Pricing API.
+# To specify the API key or disable API keys use the below settings
+# selfHostedInfracostAPIKey: CUSTOM_INFRACOST_API_KEY
+# disableSelfHostedInfracostAPIKey: true
+mongoDBURI: mongodb://mongo:27017/pricing
   
 cronjob:
   schedule: "0 4 * * *"

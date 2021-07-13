@@ -49,7 +49,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: MONGODB_URI
-              value: {{ .Values.env.mongoDBURI }}
+              value: {{ .Values.mongoDBURI }}
             - name: DB_HOST
               value: {{ include "cloud-pricing-api.postgresql.host" . }}
             - name: DB_PORT
@@ -63,6 +63,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "cloud-pricing-api.postgresql.secretName" . }}
                   key: postgresql-password
+            - name: SELF_HOSTED_INFRACOST_PRICING_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cloud-pricing-api.fullname" . }}
+                  key: self-hosted-infracost-api-key
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

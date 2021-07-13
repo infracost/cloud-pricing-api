@@ -130,15 +130,6 @@ Get the PostgreSQL secret name
         {{- printf "%s" (include "cloud-pricing-api.postgresql.fullname" .) -}}
     {{- end -}}
 {{- else -}}
-    {{- printf "%s-external" (include "cloud-pricing-api.postgresql.fullname" .) -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return true if a secret for a external database should be created
-*/}}
-{{- define "cloud-pricing-api.postgresql.createExternalSecret" -}}
-{{- if and (not .Values.postgresql.enabled) (not .Values.postgresql.existingSecret) -}}
-  {{- true -}}
+    {{- printf "%s" (include "cloud-pricing-api.fullname" .) -}}
 {{- end -}}
 {{- end -}}
