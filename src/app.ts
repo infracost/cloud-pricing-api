@@ -6,6 +6,7 @@ import config from './config';
 import ApolloLogger from './utils/apolloLogger';
 import resolvers from './resolvers';
 import typeDefs from './typeDefs';
+import health from './health';
 
 type ApplicationOptions = {
   apolloConfigOverrides?: ApolloServerExpressConfig;
@@ -27,6 +28,9 @@ function createApp(opts: ApplicationOptions = {}): Application {
         }
         return 'info';
       },
+      autoLogging: {
+        ignorePaths: ['/health'],
+      },
     })
   );
 
@@ -40,6 +44,8 @@ function createApp(opts: ApplicationOptions = {}): Application {
       }
     }
   );
+
+  app.use(health);
 
   const apolloConfig: ApolloServerExpressConfig = {
     schema: makeExecutableSchema({
